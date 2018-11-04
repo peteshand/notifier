@@ -43,7 +43,7 @@ notifier.add(() -> {
 }, true);
 ```
 
-Add a standard callback listener to value changes on *notifier* with a priority of 10 (higher is called first).
+Add a standard callback listener to value changes on *notifier* with a priority of 10 (higher priorities are called first).
 
 ```
 notifier.add(() -> {
@@ -51,7 +51,7 @@ notifier.add(() -> {
 }, 10);
 ```
 
-Add a standard callback listener to value changes on *notifier* that is automatically removed after the first value change and with a priority of 100 (higher is called first).
+Add a standard callback listener to value changes on *notifier* that is automatically removed after the first value change and with a priority of 100.
 
 ```
 notifier.add(() -> {
