@@ -54,12 +54,4 @@ class Notifier<T> extends Signal
 	{
 		return _value != value || !requireChange;
 	}
-
-	inline function applyActions(value:Null<T>)
-	{
-		if (actions != null) {
-			for (i in 0...actions.length) value = actions[i](value);
-		}
-		return value;
-	}
 }
