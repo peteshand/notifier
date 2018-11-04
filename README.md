@@ -13,7 +13,7 @@ You can view some examples of notifier usage [here](https://github.com/peteshand
 
 ### Importing
 
-The Notifierclass can be imported through notifier.Notifier
+The Notifier class can be imported through notifier.Notifier
 
 ```haxe
 import notifier.Notifier;
