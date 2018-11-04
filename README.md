@@ -59,22 +59,36 @@ notifier.add(() -> {
 }, true, 100);
 ```
 
-set the value of *notifier* to *10* callbacks; *D*, *C*, *A*, and *B* will be fired in that order.
+set the value of *notifier* to *10*
 
 ```haxe
 notifier.value = 10;
+
+// trace out:
+// D: value = 10
+// C: value = 10
+// A: value = 10
+// B: value = 10
 ```
 
-set the value of *notifier* to *100* callbacks; *C*, and *A* will be fired in that order.
+set the value of *notifier* to *100*
 
 ```haxe
 notifier.value = 100;
+
+// trace out:
+// C: value = 100
+// A: value = 100
 ```
 
-set the value of *notifier* to 200 callbacks; C, and A will be fired in that order.
+set the value of *notifier* to 200
 
 ```haxe
 notifier.value = 200;
+
+// trace out:
+// C: value = 200
+// A: value = 200
 ```
 
 again set the value of *notifier* to 200, no callbacks will be triggered, as the value hasn't changed.
@@ -93,6 +107,10 @@ set the value of *notifier* to 200 callbacks; C, and A will be fired in that ord
 
 ```haxe
 notifier.value = 200;
+
+// trace out:
+// C: value = 200
+// A: value = 200
 ```
 
 calling notifier.silentlySet(value) allows you to change the value of the notifier without any callbacks being triggered.
