@@ -13,30 +13,47 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package notifier;
 
-class Signal
+class Signal extends BaseSignal<Void -> Void>
+{
+	public function dispatch()
+	{
+		sortPriority();
+		disptachCallbacks();
+	}
+
+	override function disptachCallback(callback:Void -> Void)
+	{
+		callback();
+	}
+}
+
+class BaseSignal<Callback>
 {
 	public var numListeners(get, null):Int;
 
 	var callbacks:Array<SignalCallbackData> = [];
 	var requiresSort:Bool = false;
-
+	
 	public function new()
 	{
 
 	}
 
-	public function dispatch()
+	inline function sortPriority()
 	{
 		if (requiresSort){
-			callbacks.sort(SortCallbacks);
+			callbacks.sort(sortCallbacks);
 			requiresSort = false;
 		}
+	}
 
+	inline function disptachCallbacks()
+	{
 		var i:Int = 0;
 		while (i < callbacks.length) {
 			var callbackData = callbacks[i];
 			callbackData.callCount++;
-			callbackData.callback();
+			disptachCallback(callbackData.callback);
 			if (callbackData.fireOnce == true){
 				callbacks.splice(i, 1);
 			} else {
@@ -45,7 +62,12 @@ class Signal
 		}
 	}
 
-	function SortCallbacks(s1:SignalCallbackData, s2:SignalCallbackData):Int
+	function disptachCallback(callback:Callback)
+	{
+		// implement in override
+	}
+
+	function sortCallbacks(s1:SignalCallbackData, s2:SignalCallbackData):Int
 	{
 		if (s1.priority > s2.priority) return -1;
 		else if (s1.priority < s2.priority) return 1;
@@ -57,7 +79,7 @@ class Signal
 		return callbacks.length;
 	}
 
-	public function add(callback:Void -> Void, ?fireOnce:Bool=false, ?priority:Int = 0):Void
+	public function add(callback:Callback, ?fireOnce:Bool=false, ?priority:Int = 0):Void
 	{
 		callbacks.push({
 			callback:callback,
@@ -73,7 +95,7 @@ class Signal
 		callbacks = [];
 	}
 
-	public function remove(callback:Void -> Void):Void
+	public function remove(callback:Callback):Void
 	{
 		var i:Int = 0;
 		while (i < callbacks.length) {
@@ -88,7 +110,7 @@ class Signal
 
 typedef SignalCallbackData =
 {
-	callback:Void -> Void,
+	callback:Dynamic,
 	callCount:Int,
 	fireOnce:Bool,
 	priority:Int
