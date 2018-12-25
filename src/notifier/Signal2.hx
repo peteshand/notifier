@@ -1,5 +1,7 @@
 package notifier;
 
+import notifier.Signal.BaseSignal;
+
 class Signal2<T, K> extends BaseSignal<T -> K -> Void>
 {
 	public var value1:T;
