@@ -9,8 +9,6 @@ Benefits:
 * Removes the need to create getter/setters that check if the value has changed.
 * Can act similar to single property Signals.
 
-You can view some examples of notifier usage [here](https://github.com/peteshand/notifier).
-
 ### Importing
 
 The Notifier class can be imported through notifier.Notifier
@@ -24,7 +22,7 @@ import notifier.Notifier;
 This is an example of how to create a Notifier of type Int and give it a default value of 5.
 
 ```haxe
-var notifier:Notifier<Int> = new Notifier<Int>(5);
+var notifier = new Notifier<Int>(5);
 ```
 
 Add a standard callback listener to value changes on *notifier*.

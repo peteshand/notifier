@@ -13,6 +13,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package notifier;
 
+import signal.Signal;
 class Notifier<T> extends Signal 
 {
 	public var requireChange:Bool = true;
