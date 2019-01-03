@@ -19,7 +19,7 @@ import notifier.Notifier;
 
 ### Basic usage
 
-The following is an example of how to create a Notifier of type Int and give it a default value of 5.
+This is an example of how to create a Notifier of type Int and give it a default value of 5.
 
 ```haxe
 var notifier = new Notifier<Int>(5);
