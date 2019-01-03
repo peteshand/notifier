@@ -2,13 +2,13 @@
 	"name": "notifier",
 	"url": "https://github.com/peteshand/notifier",
 	"license": "MIT",
-	"tags": ["signal", "notifier", "observable"],
+	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.0.0",
-	"releasenote": "Signal1 and Signal2 added",
+	"version": "1.0.1",
+	"releasenote": "update signals dependency",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
-		"signal": ""
+		"signals": ""
 	}
 }
