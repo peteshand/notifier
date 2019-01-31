@@ -2,7 +2,7 @@ package notifier.ext;
 
 import notifier.Notifier;
 
-class NotifierEx extends Notifer
+class NotifierEx<T> extends Notifier<T>
 {
     var _setHandlers:Array<T->Void>;
 	var _unsetHandlers:Array<T->Void>;
@@ -23,6 +23,12 @@ class NotifierEx extends Notifer
 	{
 		if (actions == null) actions = [];
 		actions.push(action);
+	}
+
+	inline function applyActions(value:Null<T>)
+	{
+		if (actions != null) for (i in 0...actions.length) value = actions[i](value);
+		return value;
 	}
 
     inline function applyUnsets()

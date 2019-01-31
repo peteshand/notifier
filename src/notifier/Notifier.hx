@@ -39,7 +39,6 @@ class Notifier<T> extends Signal
 	
 	function set_value(value:Null<T>):Null<T> 
 	{
-		
 		if (!changeRequired(value)) return value;
 		_value = value;
 		this.dispatch();
