@@ -13,17 +13,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package notifier;
 
-import signal.Signal;
-class Notifier<T> extends Signal 
+import signal.Signal.BaseSignal;
+import haxe.extern.EitherType;
+import utils.FunctionUtil;
+
+// Void -> Void || Generic -> Void
+typedef Func0or1<T> = EitherType<Void -> Void, T -> Void>;
+
+class Notifier<T> extends BaseSignal<Func0or1<T>>
 {
 	public var requireChange:Bool = true;
 	var _value:T;
 	
 	public var value(get, set):Null<T>;
-	
-	public function new(?defaultValue:T) 
+	var id:String;
+
+	public function new(?defaultValue:T, ?id:String) 
 	{
 		_value = defaultValue;
+		this.id = id;
 		super();
 	}
 	
@@ -53,5 +61,25 @@ class Notifier<T> extends Signal
 	inline function changeRequired(value:Null<T>):Bool
 	{
 		return _value != value || !requireChange;
+	}
+
+	public function dispatch()
+	{
+		sortPriority();
+		dispatchCallbacks();
+	}
+
+	var callback0:Void -> Void;
+	var callback1:T -> Void;
+	
+	override function dispatchCallback(callback:Func0or1<T>)
+	{
+		if (Std.is(callback, Void -> Void)) {
+			callback0 = untyped callback;
+			callback0();
+		} else {
+			callback1 = untyped callback;
+			callback1(value);
+		}
 	}
 }

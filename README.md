@@ -33,6 +33,14 @@ notifier.add(() -> {
 });
 ```
 
+You can also pass a callback that expects a single param of the type specified when creating the *notifier*, in this case 'Int'
+
+```haxe
+notifier.add((value:Int) -> {
+    trace("A: value = " + value);
+});
+```
+
 Add a standard callback listener to value changes on *notifier* that is automatically removed after the first value change.
 
 ```

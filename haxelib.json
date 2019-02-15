@@ -4,11 +4,12 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.0.3",
-	"releasenote": "NotifierEx minor updates",
+	"version": "1.0.4",
+	"releasenote": "Allow for Void -> Void or Generic -> Void callbacks in .add method",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
-		"signals": ""
+		"signals": "",
+		"utils": ""
 	}
 }
