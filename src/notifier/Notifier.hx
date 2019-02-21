@@ -20,6 +20,10 @@ import utils.FunctionUtil;
 // Void -> Void || Generic -> Void
 typedef Func0or1<T> = EitherType<Void -> Void, T -> Void>;
 
+/**
+ * @author P.J.Shand
+ */
+
 class Notifier<T> extends BaseSignal<Func0or1<T>>
 {
 	public var requireChange:Bool = true;

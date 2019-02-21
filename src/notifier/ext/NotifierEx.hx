@@ -2,6 +2,9 @@ package notifier.ext;
 
 import notifier.Notifier;
 
+/**
+ * @author Thomas Byrne
+ */
 class NotifierEx<T> extends Notifier<T>
 {
     var _setHandlers:Array<T->Void>;
