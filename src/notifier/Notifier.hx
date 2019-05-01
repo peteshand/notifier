@@ -32,11 +32,11 @@ class Notifier<T> extends BaseSignal<Func0or1<T>>
 	public var value(get, set):Null<T>;
 	var id:String;
 
-	public function new(?defaultValue:T, ?id:String) 
+	public function new(?defaultValue:T, ?id:String, ?fireOnAdd:Bool=false) 
 	{
 		_value = defaultValue;
 		this.id = id;
-		super();
+		super(fireOnAdd);
 	}
 	
 	function toString():String
