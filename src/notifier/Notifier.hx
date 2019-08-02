@@ -78,12 +78,22 @@ class Notifier<T> extends BaseSignal<Func0or1<T>>
 	
 	override function dispatchCallback(callback:Func0or1<T>)
 	{
-		if (Std.is(callback, Void -> Void)) {
-			callback0 = untyped callback;
-			callback0();
-		} else {
-			callback1 = untyped callback;
-			callback1(value);
-		}
+		#if (haxe_ver >= 4.0)
+			if (Std.is(callback, Void -> Void)) {
+				callback0 = untyped callback;
+				callback0();
+			} else {
+				callback1 = untyped callback;
+				callback1(value);
+			}
+		#else
+			try {
+				callback1 = callback;
+				callback1(value);
+			} catch (e:Dynamic){
+				callback0 = callback;
+				callback0();
+			}
+		#end
 	}
 }
