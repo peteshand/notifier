@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.0.7",
-	"releasenote": "Add haxe3 function check try catch fallback",
+	"version": "1.0.8",
+	"releasenote": "js console enhancements",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
