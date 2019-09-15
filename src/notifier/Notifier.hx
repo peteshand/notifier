@@ -16,6 +16,7 @@ package notifier;
 import signal.Signal.BaseSignal;
 import haxe.extern.EitherType;
 import utils.FunctionUtil;
+import notifier.api.IReadWritable;
 
 // Void -> Void || Generic -> Void
 typedef Func0or1<T> = EitherType<Void->Void, T->Void>;
@@ -23,7 +24,7 @@ typedef Func0or1<T> = EitherType<Void->Void, T->Void>;
 /**
  * @author P.J.Shand
  */
-class Notifier<T> extends BaseSignal<Func0or1<T>> {
+class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	#if js
 	@:noCompletion private static function __init__() {
 		untyped Object.defineProperties(Notifier.prototype, {
@@ -99,5 +100,30 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> {
 			callback0();
 		}
 		#end
+	}
+
+	public function read():T
+		return this.value;
+
+	public function write(value:T)
+		this.value = value;
+
+	// alternative to .add
+	public inline function watch(handler:T->Void, ?priority:Null<Int>) {
+		if (priority != 0) {
+			var warningMessage:String = "\nWARNING:the rpriority param will be removed from 'Notifier.watch' in a future release\nInstead use daisy chain methods, eg: obj.watch(callback).priority(1000);";
+			#if js
+			untyped __js__('console.warn(warningMessage)');
+			#else
+			trace(warningMessage);
+			#end
+		}
+		add(handler).priority(priority);
+		return this;
+	}
+
+	// alternative to .remove
+	public inline function unwatch(handler:T->Void) {
+		remove(handler);
 	}
 }
