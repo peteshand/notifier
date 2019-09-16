@@ -38,6 +38,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 
 	public var requireChange:Bool = true;
 
+	var modifiers:Array<T->T>;
 	var _value:T;
 
 	public var value(get, set):Null<T>;
@@ -55,7 +56,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	}
 
 	function get_value():Null<T> {
-		return _value;
+		return applyModifiers(_value);
 	}
 
 	function set_value(value:Null<T>):Null<T> {
@@ -102,6 +103,23 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 		#end
 	}
 
+	public inline function addAction(action:T->T) 
+	{
+		addModifier(action);
+	}
+
+	public function addModifier(modifier:T->T) 
+	{
+		if (modifiers == null) modifiers = [];
+		modifiers.push(modifier);
+	}
+
+	inline function applyModifiers(value:Null<T>)
+	{
+		if (modifiers != null) for (i in 0...modifiers.length) value = modifiers[i](value);
+		return value;
+	}
+
 	public function read():T
 		return this.value;
 
@@ -109,8 +127,8 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 		this.value = value;
 
 	// alternative to .add
-	public inline function watch(handler:T->Void, ?priority:Null<Int>) {
-		if (priority != 0) {
+	public inline function watch(handler:T->Void, ?priority:Null<Int> = null) {
+		if (priority != null) {
 			var warningMessage:String = "\nWARNING:the rpriority param will be removed from 'Notifier.watch' in a future release\nInstead use daisy chain methods, eg: obj.watch(callback).priority(1000);";
 			#if js
 			untyped __js__('console.warn(warningMessage)');

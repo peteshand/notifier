@@ -9,28 +9,19 @@ class NotifierEx<T> extends Notifier<T>
 {
     var _setHandlers:Array<T->Void>;
 	var _unsetHandlers:Array<T->Void>;
-    var actions:Array<T->T>;
+    
+	override function get_value():Null<T> {
+		return _value;
+	}
 
     override function set_value(value:Null<T>):Null<T> 
 	{
-		value = applyActions(value);
+		value = applyModifiers(value);
 		if (!changeRequired(value)) return value;
         applyUnsets();
 		_value = value;
         applySets();
 		this.dispatch();
-		return value;
-	}
-    
-    public function addAction(action:T->T) 
-	{
-		if (actions == null) actions = [];
-		actions.push(action);
-	}
-
-	inline function applyActions(value:Null<T>)
-	{
-		if (actions != null) for (i in 0...actions.length) value = actions[i](value);
 		return value;
 	}
 
