@@ -13,17 +13,14 @@
 
 package notifier;
 
-import signal.Signal.BaseSignal;
+import signals.Signal.BaseSignal;
 import haxe.extern.EitherType;
 import utils.FunctionUtil;
 import notifier.api.IReadWritable;
 
-// Void -> Void || Generic -> Void
 typedef Func0or1<T> = EitherType<Void->Void, T->Void>;
 
-/**
- * @author P.J.Shand
- */
+@:expose("Notifier")
 class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	#if js
 	@:noCompletion private static function __init__() {
@@ -103,20 +100,26 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 		#end
 	}
 
-	public inline function addAction(action:T->T) 
-	{
+	public inline function addAction(action:T->T) {
+		var warningMessage:String = "\nWARNING: addAction methed will be removed in a future release, use addModifier instead";
+		#if js
+		untyped __js__('console.warn(warningMessage)');
+		#else
+		trace(warningMessage);
+		#end
 		addModifier(action);
 	}
 
-	public function addModifier(modifier:T->T) 
-	{
-		if (modifiers == null) modifiers = [];
+	public function addModifier(modifier:T->T) {
+		if (modifiers == null)
+			modifiers = [];
 		modifiers.push(modifier);
 	}
 
-	inline function applyModifiers(value:Null<T>)
-	{
-		if (modifiers != null) for (i in 0...modifiers.length) value = modifiers[i](value);
+	inline function applyModifiers(value:Null<T>) {
+		if (modifiers != null)
+			for (i in 0...modifiers.length)
+				value = modifiers[i](value);
 		return value;
 	}
 
@@ -129,7 +132,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	// alternative to .add
 	public inline function watch(handler:T->Void, ?priority:Null<Int> = null) {
 		if (priority != null) {
-			var warningMessage:String = "\nWARNING:the rpriority param will be removed from 'Notifier.watch' in a future release\nInstead use daisy chain methods, eg: obj.watch(callback).priority(1000);";
+			var warningMessage:String = "\nWARNING:the priority param will be removed from 'Notifier.watch' in a future release\nInstead use daisy chain methods, eg: obj.watch(callback).priority(1000);";
 			#if js
 			untyped __js__('console.warn(warningMessage)');
 			#else

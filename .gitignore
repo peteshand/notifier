@@ -1,0 +1,3 @@
+*.rar
+bin/*
+!bin/main.js
