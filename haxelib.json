@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.0.8",
-	"releasenote": "js console enhancements",
+	"version": "1.1.1",
+	"releasenote": "add Persist util",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
