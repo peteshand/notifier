@@ -36,6 +36,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	public var requireChange:Bool = true;
 
 	var modifiers:Array<T->T>;
+	var defaultValue:T;
 	var _value:T;
 
 	public var value(get, set):Null<T>;
@@ -43,7 +44,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	var id:String;
 
 	public function new(?defaultValue:T, ?id:String, ?fireOnAdd:Bool = false) {
-		_value = defaultValue;
+		_value = this.defaultValue = defaultValue;
 		this.id = id;
 		super(fireOnAdd);
 	}
