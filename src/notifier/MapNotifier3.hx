@@ -1,5 +1,6 @@
 package notifier;
 
+import haxe.Json;
 import signals.Signal1;
 import signals.Signal2;
 import notifier.Notifier;
@@ -33,12 +34,17 @@ class MapNotifier3<K, T> extends Notifier<Map<K, T>> {
 
 	public function set(k:K, v:T):Void {
 		var alreadyExists:Bool = exists(k);
+		var currentValue:T = value.get(k);
 		value.set(k, v);
-		if (alreadyExists)
-			onChange.dispatch(k, v);
-		else
+		if (alreadyExists) {
+			if (currentValue != v) {
+				onChange.dispatch(k, v);
+				this.dispatch();
+			}
+		} else {
 			onAdd.dispatch(k, v);
-		this.dispatch();
+			this.dispatch();
+		}
 	}
 
 	public function exists(k:K):Bool {
