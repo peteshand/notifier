@@ -22,6 +22,8 @@ class MapNotifier3<K, T> extends Notifier<Map<K, T>> {
 	public var onChange = new Signal2<K, T>();
 	public var array(get, null):Array<T>;
 
+	var notifiers = new Map<String, Notifier<T>>();
+
 	public function new(?defaultValue:Map<K, T>, ?id:String, ?fireOnAdd:Bool = false) {
 		if (defaultValue == null)
 			defaultValue = untyped new Map<String, T>();
@@ -39,10 +41,12 @@ class MapNotifier3<K, T> extends Notifier<Map<K, T>> {
 		if (alreadyExists) {
 			if (currentValue != v) {
 				onChange.dispatch(k, v);
+				dispatchNotifiers(k, v);
 				this.dispatch();
 			}
 		} else {
 			onAdd.dispatch(k, v);
+			dispatchNotifiers(k, v);
 			this.dispatch();
 		}
 	}
@@ -58,6 +62,7 @@ class MapNotifier3<K, T> extends Notifier<Map<K, T>> {
 			return false;
 		var removed:Bool = value.remove(k);
 		onRemove.dispatch(k);
+		dispatchNotifiers(k, null);
 		this.dispatch();
 		return removed;
 	}
@@ -93,6 +98,24 @@ class MapNotifier3<K, T> extends Notifier<Map<K, T>> {
 	public function clear() {
 		for (key in keys()) {
 			removeItem(key);
+		}
+	}
+
+	/////////////////////////////////////////////////
+
+	public function getNotifier(key:K):Notifier<T> {
+		var notifier = notifiers.get(Std.string(key));
+		if (notifier == null) {
+			notifier = new Notifier<T>();
+			notifiers.set(Std.string(key), notifier);
+		}
+		return notifier;
+	}
+
+	inline function dispatchNotifiers(key:K, value:T) {
+		var notifier = notifiers.get(Std.string(key));
+		if (notifier != null) {
+			notifier.value = value;
 		}
 	}
 }

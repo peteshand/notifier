@@ -77,18 +77,38 @@ class Persist {
 		notifier.onRemove.add(onChange);
 	}
 
-	public static function registerMap3(map3:MapNotifier3<Dynamic, Dynamic>, id:String) {
-		var data = getNPData(id);
+	public static function registerMap3(map3:MapNotifier3<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
+		var data = getNPData(id, key);
 		if (data.localData != null) {
 			var a:String = data.localData;
 			if (a != null) {
-				var unserializer = new Unserializer(a);
-				map3.value = unserializer.unserialize();
+				try {
+					var unserializer = new Unserializer(a);
+					if (key == null) {
+						var local:MapNotifier3<Dynamic, Dynamic> = unserializer.unserialize();
+						trace(local);
+						for (key => value in local.keyValueIterator()) {
+							map3.value.set(key, value);
+						}
+					} else {
+						var v = unserializer.unserialize();
+						trace(v);
+						map3.value.set(key, unserializer.unserialize());
+					}
+				} catch (e:Dynamic) {
+					trace(e);
+					trace(a);
+				}
 			}
 		}
 
 		var serializer = function() {
-			data.sharedObject.setProperty("value", Serializer.run(map3.value));
+			if (key == null) {
+				data.sharedObject.setProperty("value", Serializer.run(map3.value));
+			} else {
+				data.sharedObject.setProperty(key, Serializer.run(map3.value.get(key)));
+			}
+
 			data.sharedObject.flush();
 		}
 
@@ -100,11 +120,11 @@ class Persist {
 		maps.set(id, map3);
 	}
 
-	static function getNPData(id:String):NPData {
+	static function getNPData(id:String, key:Dynamic = 'value'):NPData {
 		var sharedObject:DocStore = DocStore.getLocal("notifiers/" + id);
 		return {
 			sharedObject: sharedObject,
-			localData: Reflect.getProperty(sharedObject.data, "value")
+			localData: Reflect.getProperty(sharedObject.data, key)
 		}
 	}
 }
