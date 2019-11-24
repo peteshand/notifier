@@ -1,6 +1,5 @@
 package notifier;
 
-import mantle.filesystem.DocStore;
 import time.EnterFrame;
 import haxe.ds.ObjectMap;
 import signals.Signal1;
@@ -20,19 +19,7 @@ class MapNotifier<T> {
 	public var removedItems = new Array<T>();
 	public var changedItems = new Array<T>();
 
-	// private var sharedObject:DocStore;
-
-	public function new( /*id:String=null*/) {
-		/*if (id != null) {
-			sharedObject = DocStore.getLocal("ParseDataBind-" + id);
-
-			var savedData:Array<T> = Reflect.getProperty(sharedObject.data, "savedData");
-			if (savedData != null) {
-				this.addArray(untyped savedData);
-			}
-			check();
-		}*/
-
+	public function new() {
 		EnterFrame.add(onTick);
 	}
 
