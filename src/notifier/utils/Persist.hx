@@ -3,14 +3,13 @@ package notifier.utils;
 import utils.DocStore;
 import notifier.Notifier;
 import notifier.MapNotifier;
-import notifier.MapNotifier3;
 import haxe.Serializer;
 import haxe.Unserializer;
 
 @:access(notifier.Notifier)
 class Persist {
 	static var notifiers = new Map<String, Notifier<Dynamic>>();
-	static var maps = new Map<String, MapNotifier3<Dynamic, Dynamic>>();
+	static var maps = new Map<String, MapNotifier<Dynamic, Dynamic>>();
 
 	public static function register(notifier:Notifier<Dynamic>, id:String, silentlySet:Bool = true) {
 		var data = getNPData(id);
@@ -52,32 +51,14 @@ class Persist {
 		notifier.value = notifier.defaultValue;
 	}
 
-	static function resetMap(map:MapNotifier3<Dynamic, Dynamic>) {
+	static function resetMap(map:MapNotifier<Dynamic, Dynamic>) {
 		if (map == null)
 			return;
 
 		map.clear();
 	}
 
-	public static function registerMap(notifier:MapNotifier<Dynamic>, id:String) {
-		var data = getNPData(id);
-		if (data.localData != null) {
-			var a:Array<Dynamic> = data.localData;
-			for (i in 0...a.length)
-				notifier.add(a[i]);
-		}
-
-		var onChange = function(a:Array<Dynamic> = null) {
-			data.sharedObject.setProperty("value", notifier.allItems);
-			data.sharedObject.flush();
-		}
-
-		notifier.onAdd.add(onChange);
-		notifier.onChange.add(onChange);
-		notifier.onRemove.add(onChange);
-	}
-
-	public static function registerMap3(map3:MapNotifier3<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
+	public static function registerMap3(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
 		var data = getNPData(id, key);
 		if (data.localData != null) {
 			var a:String = data.localData;
@@ -85,7 +66,7 @@ class Persist {
 				try {
 					var unserializer = new Unserializer(a);
 					if (key == null) {
-						var local:MapNotifier3<Dynamic, Dynamic> = unserializer.unserialize();
+						var local:MapNotifier<Dynamic, Dynamic> = unserializer.unserialize();
 						trace(local);
 						for (key => value in local.keyValueIterator()) {
 							map3.value.set(key, value);

@@ -1,131 +1,121 @@
 package notifier;
 
-import time.EnterFrame;
-import haxe.ds.ObjectMap;
+import haxe.Json;
 import signals.Signal1;
+import signals.Signal2;
+import notifier.Notifier;
 
-/**
- * ...
- * @author P.J.Shand
- */
-class MapNotifier<T> {
-	private var data = new ObjectMap<{}, T>();
+class MapNotifier<K, T> extends Notifier<Map<K, T>> {
+	#if js
+	@:noCompletion private static function __init__() {
+		untyped Object.defineProperties(MapNotifier.prototype, {
+			"array": {
+				get: untyped __js__("function () { return this.get_array (); }"),
+				set: untyped __js__("function (v) { return this.set_array (v); }")
+			},
+		});
+	}
+	#end
 
-	public var onAdd = new Signal1<Array<T>>();
-	public var onRemove = new Signal1<Array<T>>();
-	public var onChange = new Signal1<Array<T>>();
-	public var allItems = new Array<T>();
-	public var newItems = new Array<T>();
-	public var removedItems = new Array<T>();
-	public var changedItems = new Array<T>();
+	public var onAdd = new Signal2<K, T>();
+	public var onRemove = new Signal1<K>();
+	public var onChange = new Signal2<K, T>();
+	public var array(get, null):Array<T>;
 
-	public function new() {
-		EnterFrame.add(onTick);
+	var notifiers = new Map<String, Notifier<T>>();
+
+	public function new(?defaultValue:Map<K, T>, ?id:String, ?fireOnAdd:Bool = false) {
+		if (defaultValue == null)
+			defaultValue = untyped new Map<String, T>();
+		super(defaultValue, id, fireOnAdd);
 	}
 
-	function onTick() {
-		check();
+	public function get(k:K):T {
+		return value.get(k);
 	}
 
-	public function check():Void {
-		if (newItems.length != 0) {
-			onAdd.dispatch(newItems);
-			newItems = new Array<T>();
-		}
-		if (changedItems.length != 0) {
-			onChange.dispatch(changedItems);
-			changedItems = new Array<T>();
-		}
-		if (removedItems.length != 0) {
-			onRemove.dispatch(removedItems);
-			removedItems = new Array<T>();
-		}
-	}
-
-	public inline function exists(key:T):Bool {
-		return data.exists(untyped key);
-	}
-
-	public inline function get(key:T):T {
-		return data.get(untyped key);
-	}
-
-	public inline function iterator():Iterator<T> {
-		return data.iterator();
-	}
-
-	public inline function keys():Iterator<T> {
-		return untyped data.keys();
-	}
-
-	public function add(value:T) {
-		if (exists(value)) {
-			data.set(untyped value, value);
-			changedItems.push(value);
+	public function set(k:K, v:T):Void {
+		var alreadyExists:Bool = exists(k);
+		var currentValue:T = value.get(k);
+		value.set(k, v);
+		if (alreadyExists) {
+			if (currentValue != v) {
+				onChange.dispatch(k, v);
+				dispatchNotifiers(k, v);
+				this.dispatch();
+			}
 		} else {
-			data.set(untyped value, value);
-			newItems.push(value);
+			onAdd.dispatch(k, v);
+			dispatchNotifiers(k, v);
+			this.dispatch();
 		}
-		// updateSavedData();
-		updateAllItems();
 	}
 
-	public function addArray(value:Array<T>) {
-		for (i in 0...value.length) {
-			if (exists(value[i])) {
-				data.set(untyped value[i], value[i]);
-				changedItems.push(value[i]);
-			} else {
-				data.set(untyped value[i], value[i]);
-				newItems.push(value[i]);
-			}
-		}
-		// updateSavedData();
-		updateAllItems();
-	}
-
-	public function remove(value:T) {
+	public function exists(k:K):Bool {
 		if (value == null)
-			return;
-		if (exists(value)) {
-			data.remove(untyped value);
-			removedItems.push(value);
-		}
-		// updateSavedData();
-		updateAllItems();
+			return false;
+		return value.exists(k);
 	}
 
-	public function removeMany(value:Array<T>) {
-		for (i in 0...value.length) {
-			if (exists(value[i])) {
-				data.remove(untyped value[i]);
-				removedItems.push(value[i]);
-			}
-		}
-		// updateSavedData();
-		updateAllItems();
+	public function removeItem(k:K):Bool {
+		if (value == null)
+			return false;
+		var removed:Bool = value.remove(k);
+		onRemove.dispatch(k);
+		dispatchNotifiers(k, null);
+		this.dispatch();
+		return removed;
 	}
 
-	/*function updateSavedData() 
-		{
-			if (sharedObject == null) return;
+	public function keys():Iterator<K> {
+		return value.keys();
+	}
 
-			var parseObjects:Array<T> = [];
-			for (parseObject in data)
-			{
-				parseObjects.push(parseObject);
-			}
-			sharedObject.setProperty("savedData", parseObjects);
-			sharedObject.flush();
-	}*/
+	public function iterator():Iterator<T> {
+		return value.iterator();
+	}
+
+	public function keyValueIterator():KeyValueIterator<K, T> {
+		return value.keyValueIterator();
+	}
+
+	public function copy():Map<K, T> {
+		return value.copy();
+	}
+
+	override public function toString() {
+		return value.toString();
+	}
+
+	function get_array():Array<T> {
+		var a:Array<T> = [];
+		for (item in this.iterator()) {
+			a.push(item);
+		}
+		return a;
+	}
+
 	public function clear() {
-		removeMany(allItems);
+		for (key in keys()) {
+			removeItem(key);
+		}
 	}
 
-	function updateAllItems():Void {
-		allItems = new Array<T>();
-		for (item in data.iterator()) {
-			allItems.push(item);
+	/////////////////////////////////////////////////
+
+	public function getNotifier(key:K):Notifier<T> {
+		var notifier = notifiers.get(Std.string(key));
+		if (notifier == null) {
+			notifier = new Notifier<T>();
+			notifiers.set(Std.string(key), notifier);
+		}
+		return notifier;
+	}
+
+	inline function dispatchNotifiers(key:K, value:T) {
+		var notifier = notifiers.get(Std.string(key));
+		if (notifier != null) {
+			notifier.value = value;
 		}
 	}
 }
