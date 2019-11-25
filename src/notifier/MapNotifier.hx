@@ -24,9 +24,8 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 
 	var notifiers = new Map<String, Notifier<T>>();
 
-	public function new(?defaultValue:Map<K, T>, ?id:String, ?fireOnAdd:Bool = false) {
-		if (defaultValue == null)
-			defaultValue = untyped new Map<String, T>();
+	// var example = new MapNotifier<String, String>([]);
+	public function new(defaultValue:Map<K, T>, ?id:String, ?fireOnAdd:Bool = false) {
 		super(defaultValue, id, fireOnAdd);
 	}
 

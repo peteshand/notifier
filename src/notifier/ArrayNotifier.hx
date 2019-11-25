@@ -18,16 +18,11 @@ class ArrayNotifier<T> extends Notifier<Array<T>> {
 	}
 	#end
 
-	//public var onAdd = new Signal2<K, T>();
-	//public var onRemove = new Signal1<K>();
 	public var onChange = new Signal2<Int, T>();
-	//public var array(get, null):Array<T>;
-
 	var notifiers = new Map<Int, Notifier<T>>();
 
+	// var example = new ArrayNotifier<String>([]);
 	public function new(defaultValue:Array<T>, ?id:String, ?fireOnAdd:Bool = false) {
-		//if (defaultValue == null)
-		//	defaultValue = untyped new Array<T>();
 		super(defaultValue, id, fireOnAdd);
 	}
 
