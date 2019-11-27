@@ -58,7 +58,11 @@ class Persist {
 		map.clear();
 	}
 
-	public static function registerMap3(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
+	@:deprecated public static function registerMap3(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
+		registerMap(map3, id, key);
+	}
+
+	public static function registerMap(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
 		var data = getNPData(id, key);
 		if (data.localData != null) {
 			var a:String = data.localData;
