@@ -84,18 +84,21 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	override function dispatchCallback(callback:Func0or1<T>) {
 		try {
 			callback1 = callback;
-			callback1(value);
-		} catch (e:Dynamic){
+		} catch (e:Dynamic) {
 			try {
 				callback0 = callback;
-				callback0();
-			} catch (e:Dynamic){
-				
+			} catch (e:Dynamic) {
+				throw "callback should match Void -> Void or T -> Void";
 			}
+		}
+		if (callback1 != null) {
+			callback1(value);
+		} else if (callback0 != null) {
+			callback0();
 		}
 	}
 
-	public inline function addAction(action:T->T) {
+	@:deprecated public inline function addAction(action:T->T) {
 		var warningMessage:String = "\nWARNING: addAction methed will be removed in a future release, use addModifier instead";
 		#if js
 		untyped __js__('console.warn(warningMessage)');
