@@ -8,20 +8,32 @@ import haxe.Unserializer;
 
 @:access(notifier.Notifier)
 class Persist {
-	static var notifiers = new Map<String, Notifier<Dynamic>>();
 	static var maps = new Map<String, MapNotifier<Dynamic, Dynamic>>();
+	static var arrays = new Map<String, ArrayNotifier<Dynamic>>();
+	static var notifiers = new Map<String, Notifier<Dynamic>>();
 
-	public static function register(notifier:Notifier<Dynamic>, id:String, silentlySet:Bool = true) {
+	public static function register<T>(?map:MapNotifier<Dynamic, T>, ?array:ArrayNotifier<T>, ?notifier:Notifier<T>, id:String, ?key:Dynamic,
+			silentlySet:Bool = true) {
+		if (map != null) {
+			registerMap(map, id);
+		} else if (array != null) {
+			registerArray(array, id);
+		} else if (notifier != null) {
+			registerNotifier(notifier, id, key);
+		}
+	}
+
+	static function registerNotifier<T>(notifier:Notifier<T>, id:String, silentlySet:Bool = true) {
 		var data = getNPData(id);
-
-		if (data.localData != null) {
+		var value:T = data.value;
+		if (value != null) {
 			if (silentlySet)
-				notifier.silentlySet(data.localData);
+				notifier.silentlySet(value);
 			else
-				notifier.value = data.localData;
+				notifier.value = value;
 		}
 		notifier.add(() -> {
-			data.sharedObject.setProperty("value", notifier.value);
+			data.sharedObject.setProperty("value", Serializer.run(notifier.value));
 			data.sharedObject.flush();
 		});
 		notifiers.set(id, notifier);
@@ -42,6 +54,7 @@ class Persist {
 		} else {
 			reset(notifiers.get(id));
 			resetMap(maps.get(id));
+			resetArray(arrays.get(id));
 		}
 	}
 
@@ -54,67 +67,100 @@ class Persist {
 	static function resetMap(map:MapNotifier<Dynamic, Dynamic>) {
 		if (map == null)
 			return;
-
 		map.clear();
 	}
 
-	@:deprecated public static function registerMap3(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
-		registerMap(map3, id, key);
+	static function resetArray(array:ArrayNotifier<Dynamic>) {
+		if (array == null)
+			return;
+		array.resize(0);
 	}
 
-	public static function registerMap(map3:MapNotifier<Dynamic, Dynamic>, id:String, ?key:Dynamic) {
+	// use register(...) instead
+	static function registerMap<K, T>(mapNotifier:MapNotifier<K, T>, id:String, ?key:Dynamic) {
 		var data = getNPData(id, key);
-		if (data.localData != null) {
-			var a:String = data.localData;
-			if (a != null) {
-				try {
-					var unserializer = new Unserializer(a);
-					if (key == null) {
-						var local:MapNotifier<Dynamic, Dynamic> = unserializer.unserialize();
-						trace(local);
-						for (key => value in local.keyValueIterator()) {
-							map3.value.set(key, value);
-						}
-					} else {
-						var v = unserializer.unserialize();
-						trace(v);
-						map3.value.set(key, unserializer.unserialize());
-					}
-				} catch (e:Dynamic) {
-					trace(e);
-					trace(a);
+		if (key == null) {
+			var local:Map<K, T> = data.value;
+			if (local != null) {
+				for (key => value in local.keyValueIterator()) {
+					mapNotifier.value.set(key, value);
 				}
+			}
+		} else {
+			var local:T = data.value;
+			if (local != null) {
+				mapNotifier.value.set(key, local);
 			}
 		}
 
 		var serializer = function() {
 			if (key == null) {
-				data.sharedObject.setProperty("value", Serializer.run(map3.value));
+				data.sharedObject.setProperty("value", Serializer.run(mapNotifier.value));
 			} else {
-				data.sharedObject.setProperty(key, Serializer.run(map3.value.get(key)));
+				data.sharedObject.setProperty(Std.string(key), Serializer.run(mapNotifier.value.get(key)));
 			}
 
 			data.sharedObject.flush();
 		}
 
-		map3.onAdd.add((key:Dynamic, value:Dynamic) -> serializer());
-		map3.onChange.add((key:Dynamic, value:Dynamic) -> serializer());
-		map3.onRemove.add((key:Dynamic) -> serializer());
-		map3.add(() -> serializer());
+		mapNotifier.onAdd.add((key:K, value:T) -> serializer());
+		mapNotifier.onChange.add((key:K, value:T) -> serializer());
+		mapNotifier.onRemove.add((key:K) -> serializer());
+		mapNotifier.add(() -> serializer());
 
-		maps.set(id, map3);
+		maps.set(id, mapNotifier);
 	}
 
-	static function getNPData(id:String, key:Dynamic = 'value'):NPData {
-		var sharedObject:DocStore = DocStore.getLocal("notifiers/" + id);
+	// use register(...) instead
+	static function registerArray<T>(arrayNotifier:ArrayNotifier<T>, id:String) {
+		var data = getNPData(id);
+		var local:Array<T> = data.value;
+		if (local != null) {
+			for (i in 0...local.length) {
+				arrayNotifier.value[i] = local[i];
+			}
+		}
+
+		var serializer = function() {
+			data.sharedObject.setProperty("value", Serializer.run(arrayNotifier.value));
+			data.sharedObject.flush();
+		}
+
+		arrayNotifier.onChange.add((key:Int, value:T) -> serializer());
+		arrayNotifier.add(() -> serializer());
+
+		arrays.set(id, arrayNotifier);
+	}
+
+	static var sharedObjects = new Map<String, DocStore>();
+
+	static function getNPData<K>(id:String, key:String = null):NPData {
+		var _uid:String = "notifiers/" + id;
+		var sharedObject:DocStore = sharedObjects.get(_uid);
+		if (sharedObject == null) {
+			sharedObject = DocStore.getLocal(_uid);
+			sharedObjects.set(_uid, sharedObject);
+		}
+		if (key == null)
+			key = untyped 'value';
+		var valueObj:Dynamic = Reflect.getProperty(sharedObject.data, Std.string(key));
+		var value:Dynamic = null;
+		if (valueObj != null) {
+			try {
+				var unserializer = new Unserializer(valueObj);
+				value = unserializer.unserialize();
+			} catch (e:Dynamic) {
+				trace(e);
+			}
+		}
 		return {
 			sharedObject: sharedObject,
-			localData: Reflect.getProperty(sharedObject.data, key)
+			value: value
 		}
 	}
 }
 
 typedef NPData = {
 	sharedObject:DocStore,
-	localData:Dynamic
+	value:Dynamic
 }
