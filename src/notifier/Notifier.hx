@@ -81,7 +81,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	var callback0:Void->Void;
 	var callback1:T->Void;
 
-	override function dispatchCallback(callback:Func0or1<T>) {
+	/*override function dispatchCallback(callback:Func0or1<T>) {
 		try {
 			callback1 = callback;
 		} catch (e:Dynamic) {
@@ -96,6 +96,17 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 		} else if (callback0 != null) {
 			callback0();
 		}
+	}*/
+	override function dispatchCallback(callback:Void->Void) {
+		callback();
+	}
+
+	override function dispatchCallback1(callback:Dynamic->Void) {
+		callback(value);
+	}
+
+	override function dispatchCallback2(callback:Dynamic->Dynamic->Void) {
+		throw "Notifier does not support two param dispatch";
 	}
 
 	@:deprecated public inline function addAction(action:T->T) {
