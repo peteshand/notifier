@@ -6,24 +6,9 @@ import signals.Signal2;
 import notifier.Notifier;
 
 @:forward
-class ArrayNotifier<T> extends Notifier<Array<T>> {
-	#if js
-	@:noCompletion private static function __init__() {
-		untyped Object.defineProperties(ArrayNotifier.prototype, {
-			"array": {
-				get: untyped __js__("function () { return this.get_array (); }"),
-				set: untyped __js__("function (v) { return this.set_array (v); }")
-			},
-		});
-	}
-	#end
-
-	public var onChange = new Signal2<Int, T>();
-	var notifiers = new Map<Int, Notifier<T>>();
-
-	// var example = new ArrayNotifier<String>([]);
+abstract ArrayNotifier<T>(BaseArrayNotifier<T>) {
 	public function new(defaultValue:Array<T>, ?id:String, ?fireOnAdd:Bool = false) {
-		super(defaultValue, id, fireOnAdd);
+		this = new BaseArrayNotifier(defaultValue, id, fireOnAdd);
 	}
 
 	@:arrayAccess
@@ -35,24 +20,48 @@ class ArrayNotifier<T> extends Notifier<Array<T>> {
 	public inline function set(index:Int, v:T):T {
 		var currentValue = this.value[index];
 		this.value[index] = v;
-		if (currentValue != v){
-			change(index, v);
+		if (currentValue != v) {
+			this.change(index, v);
 		}
-		
+
 		return v;
 	}
 
-	inline function change(index:Int, v:T){
+	public inline function iterator() {
+		return untyped this.iterator();
+	}
+}
+
+class BaseArrayNotifier<T> extends Notifier<Array<T>> {
+	#if js
+	@:noCompletion private static function __init__() {
+		untyped Object.defineProperties(BaseArrayNotifier.prototype, {
+			"array": {
+				get: untyped __js__("function () { return this.get_array (); }"),
+				set: untyped __js__("function (v) { return this.set_array (v); }")
+			},
+		});
+	}
+	#end
+
+	public var onChange = new Signal2<Int, T>();
+
+	var notifiers = new Map<Int, Notifier<T>>();
+
+	// var example = new ArrayNotifier<String>([]);
+	public function new(defaultValue:Array<T>, ?id:String, ?fireOnAdd:Bool = false) {
+		super(defaultValue, id, fireOnAdd);
+	}
+
+	public function change(index:Int, v:T) {
 		onChange.dispatch(index, v);
 		dispatchNotifiers(index, v);
 		this.dispatch();
 	}
-	
 
 	/*override public function toString() {
 		return value.toString();
 	}*/
-
 	/////////////////////////////////////////////////
 
 	public function getNotifier(index:Int):Notifier<T> {
@@ -71,78 +80,62 @@ class ArrayNotifier<T> extends Notifier<Array<T>> {
 		}
 	}
 
-
-
 	/////////////////////////////////////////////////
-
-
-
 	public var length(get, null):Int;
 
-	public function get_length():Int
-	{
+	public function get_length():Int {
 		return value.length;
 	}
 
-	function concat(a:Array<T>):Array<T>
-	{
+	function concat(a:Array<T>):Array<T> {
 		return value.concat(a);
 	}
 
-	public function join(sep:String):String
-	{
+	public function join(sep:String):String {
 		return value.join(sep);
 	}
-	
-	public function pop():Null<T>
-	{
+
+	public function pop():Null<T> {
 		return value.pop();
 	}
-	
-	public function push(x:T):Int
-	{
+
+	public function push(x:T):Int {
 		var v = value.push(x);
-		change(value.length-1, x);
+		change(value.length - 1, x);
 		return v;
 	}
-	
-	public function reverse():Void
-	{
+
+	public function reverse():Void {
 		value.reverse();
 	}
-	
-	public function shift():Null<T>
-	{
+
+	public function shift():Null<T> {
 		return value.shift();
 	}
-	
-	public function slice(pos:Int, ?end:Int):Array<T>
-	{
+
+	public function slice(pos:Int, ?end:Int):Array<T> {
 		return value.slice(pos, end);
 	}
-	
-	public function sort(f:T->T->Int):Void
-	{
+
+	public function sort(f:T->T->Int):Void {
 		value.sort(f);
 	}
-	
-	public function splice(pos:Int, len:Int):Array<T>
-	{
+
+	public function splice(pos:Int, len:Int):Array<T> {
 		return value.splice(pos, len);
 	}
-	
-	public function unshift(x:T):Void
-	{
+
+	public function unshift(x:T):Void {
 		value.unshift(x);
 	}
 
-	public  function insert(pos:Int, x:T):Void {
+	public function insert(pos:Int, x:T):Void {
 		value.insert(pos, x);
 	}
 
-	//public function remove(x:T):Bool {
+	// public function remove(x:T):Bool {
 	//	return value.remove(x);
-	//}
+	// }
 
 	public function indexOf(x:T, ?fromIndex:Int):Int {
 		return value.indexOf(x, fromIndex);
@@ -151,8 +144,8 @@ class ArrayNotifier<T> extends Notifier<Array<T>> {
 	public function lastIndexOf(x:T, ?fromIndex:Int):Int {
 		return value.lastIndexOf(x, fromIndex);
 	}
-	
-	public function copy():Array<T>{
+
+	public function copy():Array<T> {
 		return value.copy();
 	}
 
