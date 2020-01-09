@@ -33,12 +33,12 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 		return value.get(k);
 	}
 
-	public function set(k:K, v:T):Void {
+	public function set(k:K, v:T, forceUpdate:Bool = false):Void {
 		var alreadyExists:Bool = exists(k);
 		var currentValue:T = value.get(k);
 		value.set(k, v);
 		if (alreadyExists) {
-			if (currentValue != v) {
+			if (currentValue != v || forceUpdate) {
 				onChange.dispatch(k, v);
 				dispatchNotifiers(k, v);
 				this.dispatch();
@@ -105,7 +105,7 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 	public function getNotifier(key:K):Notifier<T> {
 		var notifier = notifiers.get(Std.string(key));
 		if (notifier == null) {
-			notifier = new Notifier<T>();
+			notifier = new Notifier<T>(get(key));
 			notifiers.set(Std.string(key), notifier);
 		}
 		return notifier;
