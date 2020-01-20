@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.1.15",
-	"releasenote": "Set initial value when calling MapNotifier.getNotifier",
+	"version": "1.1.16",
+	"releasenote": "Update MapNotifier forceUpdate logic",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
