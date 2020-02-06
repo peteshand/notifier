@@ -5,7 +5,6 @@ import signals.Signal1;
 import signals.Signal2;
 import notifier.Notifier;
 
-@:access(notifier.Notifier)
 class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 	#if js
 	@:noCompletion private static function __init__() {
@@ -41,12 +40,12 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 		if (alreadyExists) {
 			if (currentValue != v || forceUpdate) {
 				onChange.dispatch(k, v);
-				dispatchNotifiers(k, v, forceUpdate);
+				dispatchNotifiers(k, v);
 				this.dispatch();
 			}
 		} else {
 			onAdd.dispatch(k, v);
-			dispatchNotifiers(k, v, forceUpdate);
+			dispatchNotifiers(k, v);
 			this.dispatch();
 		}
 	}
@@ -103,21 +102,21 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 
 	/////////////////////////////////////////////////
 
-	public function getNotifier(key:K):Notifier<T> {
+	public function getNotifier(key:K, forceUpdate:Bool = false):Notifier<T> {
 		var notifier = notifiers.get(Std.string(key));
 		if (notifier == null) {
 			notifier = new Notifier<T>(get(key));
+			notifier.add((value) -> {
+				set(key, value, forceUpdate);
+			});
 			notifiers.set(Std.string(key), notifier);
 		}
 		return notifier;
 	}
 
-	inline function dispatchNotifiers(key:K, value:T, forceUpdate:Bool = false) {
+	inline function dispatchNotifiers(key:K, value:T) {
 		var notifier = notifiers.get(Std.string(key));
 		if (notifier != null) {
-			if (forceUpdate) {
-				notifier._value = null;
-			}
 			notifier.value = value;
 		}
 	}

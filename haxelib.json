@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.1.16",
-	"releasenote": "Update MapNotifier forceUpdate logic",
+	"version": "1.1.17",
+	"releasenote": "allow non-serialized persist and add forceUpdate to getNotifier",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {

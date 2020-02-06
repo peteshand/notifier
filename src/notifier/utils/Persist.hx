@@ -1,5 +1,6 @@
 package notifier.utils;
 
+import openfl.utils.ByteArray;
 import utils.DocStore;
 import notifier.Notifier;
 import notifier.MapNotifier;
@@ -13,18 +14,18 @@ class Persist {
 	static var notifiers = new Map<String, Notifier<Dynamic>>();
 
 	public static function register<T>(?map:MapNotifier<Dynamic, T>, ?array:ArrayNotifier<T>, ?notifier:Notifier<T>, id:String, ?key:Dynamic,
-			silentlySet:Bool = true) {
+			silentlySet:Bool = true, useSerializer:Bool = true) {
 		if (map != null) {
-			registerMap(map, id);
+			registerMap(map, id, key);
 		} else if (array != null) {
 			registerArray(array, id);
 		} else if (notifier != null) {
-			registerNotifier(notifier, id, key);
+			registerNotifier(notifier, id, silentlySet, useSerializer);
 		}
 	}
 
-	static function registerNotifier<T>(notifier:Notifier<T>, id:String, silentlySet:Bool = true) {
-		var data = getNPData(id);
+	static function registerNotifier<T>(notifier:Notifier<T>, id:String, silentlySet:Bool = true, useSerializer:Bool = true) {
+		var data = getNPData(id, useSerializer);
 		var value:T = data.value;
 		if (value != null) {
 			if (silentlySet)
@@ -33,7 +34,7 @@ class Persist {
 				notifier.value = value;
 		}
 		notifier.add(() -> {
-			data.sharedObject.setProperty("value", Serializer.run(notifier.value));
+			data.sharedObject.setProperty("value", serialize(notifier.value, useSerializer));
 			data.sharedObject.flush();
 		});
 		notifiers.set(id, notifier);
@@ -95,9 +96,9 @@ class Persist {
 
 		var serializer = function() {
 			if (key == null) {
-				data.sharedObject.setProperty("value", Serializer.run(mapNotifier.value));
+				data.sharedObject.setProperty("value", serialize(mapNotifier.value));
 			} else {
-				data.sharedObject.setProperty(Std.string(key), Serializer.run(mapNotifier.value.get(key)));
+				data.sharedObject.setProperty(Std.string(key), serialize(mapNotifier.value.get(key)));
 			}
 
 			data.sharedObject.flush();
@@ -122,7 +123,7 @@ class Persist {
 		}
 
 		var serializer = function() {
-			data.sharedObject.setProperty("value", Serializer.run(arrayNotifier.value));
+			data.sharedObject.setProperty("value", serialize(arrayNotifier.value));
 			data.sharedObject.flush();
 		}
 
@@ -134,7 +135,7 @@ class Persist {
 
 	static var sharedObjects = new Map<String, DocStore>();
 
-	static function getNPData<K>(id:String, key:String = null):NPData {
+	static function getNPData<K>(id:String, key:String = null, useSerializer:Bool = true):NPData {
 		var _uid:String = "notifiers/" + id;
 		var sharedObject:DocStore = sharedObjects.get(_uid);
 		if (sharedObject == null) {
@@ -147,8 +148,7 @@ class Persist {
 		var value:Dynamic = null;
 		if (valueObj != null) {
 			try {
-				var unserializer = new Unserializer(valueObj);
-				value = unserializer.unserialize();
+				value = unserialize(valueObj, useSerializer);
 			} catch (e:Dynamic) {
 				trace(e);
 			}
@@ -157,6 +157,20 @@ class Persist {
 			sharedObject: sharedObject,
 			value: value
 		}
+	}
+
+	static inline function serialize(value:Dynamic, useSerializer:Bool = true):String {
+		if (useSerializer)
+			return Serializer.run(value);
+		return value;
+	}
+
+	static inline function unserialize(value:Dynamic, useSerializer:Bool = true):String {
+		if (useSerializer) {
+			var unserializer = new Unserializer(value);
+			return unserializer.unserialize();
+		}
+		return value;
 	}
 }
 
