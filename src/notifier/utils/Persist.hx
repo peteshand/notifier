@@ -1,7 +1,6 @@
 package notifier.utils;
 
 import delay.Delay;
-import openfl.utils.ByteArray;
 import utils.DocStore;
 import notifier.Notifier;
 import notifier.MapNotifier;
@@ -208,7 +207,7 @@ class Persist {
 		}
 	}
 
-	static inline function serialize(value:Dynamic, ?serializerType:SerializerType):String {
+	static function serialize(value:Dynamic, ?serializerType:SerializerType):String {
 		if (serializerType == SerializerType.HAXE_SERIALIZER)
 			return Serializer.run(value);
 		else if (serializerType == SerializerType.JSON)
@@ -216,7 +215,7 @@ class Persist {
 		return value;
 	}
 
-	static inline function unserialize(value:Dynamic, ?serializerType:SerializerType):String {
+	static function unserialize(value:Dynamic, ?serializerType:SerializerType):String {
 		if (serializerType == SerializerType.HAXE_SERIALIZER) {
 			var unserializer = new Unserializer(value);
 			return unserializer.unserialize();

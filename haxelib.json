@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["notifier", "observable", "signal"],
 	"description": "Scalable and lightweight way to listen to changes to an object's value",
-	"version": "1.1.18",
-	"releasenote": "set default Serializer to SerializerType.NONE and delay save",
+	"version": "1.1.20",
+	"releasenote": "remove needless dependency",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src",
 	"dependencies": {
