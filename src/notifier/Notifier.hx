@@ -26,8 +26,8 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 	@:noCompletion private static function __init__() {
 		untyped Object.defineProperties(Notifier.prototype, {
 			"value": {
-				get: untyped __js__("function () { return this.get_value (); }"),
-				set: untyped __js__("function (v) { return this.set_value (v); }")
+				get: untyped js.Syntax.code("function () { return this.get_value (); }"),
+				set: untyped js.Syntax.code("function (v) { return this.set_value (v); }")
 			},
 		});
 	}

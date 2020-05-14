@@ -10,8 +10,8 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 	@:noCompletion private static function __init__() {
 		untyped Object.defineProperties(MapNotifier.prototype, {
 			"array": {
-				get: untyped __js__("function () { return this.get_array (); }"),
-				set: untyped __js__("function (v) { return this.set_array (v); }")
+				get: untyped js.Syntax.code("function () { return this.get_array (); }"),
+				set: untyped js.Syntax.code("function (v) { return this.set_array (v); }")
 			},
 		});
 	}
