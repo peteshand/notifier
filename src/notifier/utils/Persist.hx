@@ -37,9 +37,6 @@ class Persist {
 
 		var serializer = function() {
 			var _value:String = serialize(notifier.value, serializerType);
-			if (id == 'content/names') {
-				trace("_value = " + _value);
-			}
 			data.sharedObject.setProperty("value", _value);
 			data.sharedObject.flush();
 		}
@@ -123,10 +120,6 @@ class Persist {
 				// data.sharedObject.setProperty(Std.string(key), serialize(mapNotifier.value.get(key)));
 			}
 
-			if (id == 'content/names') {
-				trace([_key, _value]);
-			}
-
 			data.sharedObject.setProperty(_key, _value);
 			data.sharedObject.flush();
 		}
@@ -163,9 +156,6 @@ class Persist {
 
 		var serializer = function() {
 			var _value:String = serialize(arrayNotifier.value);
-			if (id == 'content/names') {
-				trace("_value = " + _value);
-			}
 			data.sharedObject.setProperty("value", _value);
 			data.sharedObject.flush();
 		}
