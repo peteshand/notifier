@@ -88,8 +88,12 @@ class MapNotifier<K, T> extends Notifier<Map<K, T>> {
 
 	function get_array():Array<T> {
 		var a:Array<T> = [];
-		for (item in this.iterator()) {
-			a.push(item);
+		if (value != null) {
+			for (item in value.iterator()) {
+				if (item != null) {
+					a.push(item);
+				}
+			}
 		}
 		return a;
 	}

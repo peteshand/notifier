@@ -2,6 +2,7 @@ package notifier.utils;
 
 import delay.Delay;
 import utils.DocStore;
+import store.encryption.IEncryption;
 import notifier.Notifier;
 import notifier.MapNotifier;
 import haxe.Serializer;
@@ -14,18 +15,18 @@ class Persist {
 	static var notifiers = new Map<String, Notifier<Dynamic>>();
 
 	public static function register<T>(?map:MapNotifier<Dynamic, T>, ?array:ArrayNotifier<T>, ?notifier:Notifier<T>, id:String, ?key:Dynamic,
-			silentlySet:Bool = true, ?serializerType:SerializerType) {
+			silentlySet:Bool = true, ?serializerType:SerializerType, ?encryption:IEncryption) {
 		if (map != null) {
-			registerMap(map, id, key);
+			registerMap(map, id, key, encryption);
 		} else if (array != null) {
-			registerArray(array, id);
+			registerArray(array, id, encryption);
 		} else if (notifier != null) {
-			registerNotifier(notifier, id, silentlySet, serializerType);
+			registerNotifier(notifier, id, silentlySet, serializerType, encryption);
 		}
 	}
 
-	static function registerNotifier<T>(notifier:Notifier<T>, id:String, silentlySet:Bool = true, ?serializerType:SerializerType) {
-		var data = getNPData(id, serializerType);
+	static function registerNotifier<T>(notifier:Notifier<T>, id:String, silentlySet:Bool = true, ?serializerType:SerializerType, ?encryption:IEncryption) {
+		var data = getNPData(id, serializerType, encryption);
 		var value:T = data.value;
 		if (value != null) {
 			if (silentlySet)
@@ -87,8 +88,8 @@ class Persist {
 	}
 
 	// use register(...) instead
-	static function registerMap<K, T>(mapNotifier:MapNotifier<K, T>, id:String, ?key:Dynamic) {
-		var data = getNPData(id, key);
+	static function registerMap<K, T>(mapNotifier:MapNotifier<K, T>, id:String, ?key:Dynamic, ?encryption:IEncryption) {
+		var data = getNPData(id, key, encryption);
 		if (key == null) {
 			var map:{h:Dynamic} = data.value;
 			if (map != null) {
@@ -151,8 +152,8 @@ class Persist {
 	}
 
 	// use register(...) instead
-	static function registerArray<T>(arrayNotifier:ArrayNotifier<T>, id:String) {
-		var data = getNPData(id);
+	static function registerArray<T>(arrayNotifier:ArrayNotifier<T>, id:String, ?encryption:IEncryption) {
+		var data = getNPData(id, null, encryption);
 		var local:Array<T> = data.value;
 		if (local != null) {
 			for (i in 0...local.length) {
@@ -183,13 +184,19 @@ class Persist {
 
 	static var sharedObjects = new Map<String, DocStore>();
 
-	static function getNPData<K>(id:String, key:String = null, ?serializerType:SerializerType):NPData {
+	static function getNPData<K>(id:String, key:String = null, ?serializerType:SerializerType, ?encryption:IEncryption):NPData {
 		var _uid:String = "notifiers/" + id;
 		var sharedObject:DocStore = sharedObjects.get(_uid);
 		if (sharedObject == null) {
 			sharedObject = DocStore.getLocal(_uid);
 			sharedObjects.set(_uid, sharedObject);
 		}
+		if (encryption != null) {
+			sharedObject.addEncoder(encryption.encode);
+			sharedObject.addDecoder(encryption.decode);
+		}
+		sharedObject.read();
+
 		if (key == null)
 			key = untyped 'value';
 		var valueObj:Dynamic = Reflect.getProperty(sharedObject.data, Std.string(key));

@@ -13,6 +13,7 @@
 
 package notifier;
 
+import signals.Signal.SignalCallbackData;
 import signals.Signal.BaseSignal;
 import haxe.extern.EitherType;
 import utils.FunctionUtil;
@@ -83,36 +84,40 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 
 	/*override function dispatchCallback(callback:Func0or1<T>) {
 		try {
-			callback1 = callback;
+					 callback1 = callback;
 		} catch (e:Dynamic) {
-			try {
-				callback0 = callback;
-			} catch (e:Dynamic) {
-				throw "callback should match Void -> Void or T -> Void";
-			}
+					 try {
+						 callback0 = callback;
+					 } catch (e:Dynamic) {
+						 throw "callback should match Void -> Void or T -> Void";
+					 }
 		}
 		if (callback1 != null) {
-			callback1(value);
+					 callback1(value);
 		} else if (callback0 != null) {
-			callback0();
+					 callback0();
 		}
 	}*/
-	override function dispatchCallback(callback:Void->Void) {
+	override function dispatchCallback(callback:Void->Void, callbackData:SignalCallbackData) {
 		callback();
 	}
 
-	override function dispatchCallback1(callback:Dynamic->Void) {
+	override function dispatchCallback1(callback:Dynamic->Void, callbackData:SignalCallbackData) {
 		callback(value);
 	}
 
-	override function dispatchCallback2(callback:Dynamic->Dynamic->Void) {
+	override function dispatchCallback2(callback:Dynamic->Dynamic->Void, callbackData:SignalCallbackData) {
 		throw "Notifier does not support two param dispatch";
+	}
+
+	override function dispatchCallback3(callback:(Dynamic, Dynamic, Dynamic) -> Void, callbackData:SignalCallbackData) {
+		throw "Notifier does not support three param dispatch";
 	}
 
 	@:deprecated public inline function addAction(action:T->T) {
 		var warningMessage:String = "\nWARNING: addAction methed will be removed in a future release, use addModifier instead";
 		#if js
-		untyped __js__('console.warn(warningMessage)');
+		untyped js.Syntax.code('console.warn(warningMessage)');
 		#else
 		trace(warningMessage);
 		#end
@@ -143,7 +148,7 @@ class Notifier<T> extends BaseSignal<Func0or1<T>> implements IReadWritable<T> {
 		if (priority != null) {
 			var warningMessage:String = "\nWARNING:the priority param will be removed from 'Notifier.watch' in a future release\nInstead use daisy chain methods, eg: obj.watch(callback).priority(1000);";
 			#if js
-			untyped __js__('console.warn(warningMessage)');
+			untyped js.Syntax.code('console.warn(warningMessage)');
 			#else
 			trace(warningMessage);
 			#end
