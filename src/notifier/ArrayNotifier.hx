@@ -88,15 +88,21 @@ class BaseArrayNotifier<T> extends Notifier<Array<T>> {
 	}
 
 	function concat(a:Array<T>):Array<T> {
-		return value.concat(a);
+		var v = value.concat(a);
+		this.dispatch();
+		return v;
 	}
 
 	public function join(sep:String):String {
-		return value.join(sep);
+		var v = value.join(sep);
+		this.dispatch();
+		return v;
 	}
 
 	public function pop():Null<T> {
-		return value.pop();
+		var v = value.pop();
+		this.dispatch();
+		return v;
 	}
 
 	public function push(x:T):Int {
@@ -107,6 +113,7 @@ class BaseArrayNotifier<T> extends Notifier<Array<T>> {
 
 	public function reverse():Void {
 		value.reverse();
+		this.dispatch();
 	}
 
 	public function shift():Null<T> {
@@ -114,7 +121,9 @@ class BaseArrayNotifier<T> extends Notifier<Array<T>> {
 	}
 
 	public function slice(pos:Int, ?end:Int):Array<T> {
-		return value.slice(pos, end);
+		var v = value.slice(pos, end);
+		this.dispatch();
+		return v;
 	}
 
 	public function sort(f:T->T->Int):Void {
@@ -122,15 +131,19 @@ class BaseArrayNotifier<T> extends Notifier<Array<T>> {
 	}
 
 	public function splice(pos:Int, len:Int):Array<T> {
-		return value.splice(pos, len);
+		var v = value.splice(pos, len);
+		this.dispatch();
+		return v;
 	}
 
 	public function unshift(x:T):Void {
 		value.unshift(x);
+		this.dispatch();
 	}
 
 	public function insert(pos:Int, x:T):Void {
 		value.insert(pos, x);
+		this.dispatch();
 	}
 
 	// public function remove(x:T):Bool {
@@ -151,5 +164,6 @@ class BaseArrayNotifier<T> extends Notifier<Array<T>> {
 
 	public function resize(len:Int):Void {
 		value.resize(len);
+		this.dispatch();
 	}
 }
